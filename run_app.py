@@ -1,21 +1,18 @@
 import os
 import sys
-
-# 🛑 CRITICAL WORKAROUND: Force PyInstaller to capture Streamlit runtime dependencies
-import streamlit.runtime
-import streamlit.runtime.scriptrunner
-import streamlit.runtime.scriptrunner.magic_funcs
 import streamlit.web.cli as stcli
 
-def get_resource_path():
-    """ Resolves absolute path to resource, working for dev and PyInstaller """
-    if hasattr(sys, '_MEIPASS'):
-        return sys._MEIPASS
-    return os.path.dirname(__file__)
-
-if __name__ == '__main__':
-    base_path = get_resource_path()
-    script_path = os.path.join(base_path, 'app.py')
+if __name__ == "__main__":
+    # FIXED: sys.argv[0] gets the true directory where the user clicked the .exe file
+    exe_dir = os.path.dirname(sys.argv[0])
+    script_path = os.path.join(exe_dir, "app.py")
     
+    # Check if app.py is missing and show a helpful warning if it is
+    if not os.path.exists(script_path):
+        print(f"CRITICAL ERROR: 'app.py' not found at: {script_path}")
+        print("Please ensure app.py is placed in the exact same folder as this executable.")
+        input("Press Enter to close...")
+        sys.exit(1)
+
     sys.argv = ["streamlit", "run", script_path, "--global.developmentMode=false"]
     sys.exit(stcli.main())
